@@ -83,13 +83,12 @@ export const filterReducer = (getState, action) => {
 
 const UPDATE_ASSET = 'UPDATE_ASSET';
 
-export const updateStoreForAssetRow = () => ({
-    type: UPDATE_ASSET
-});
+export function updateStoreForAssetRow (asset){
+    return { type: UPDATE_ASSET, asset }
+};
 
 export const assetReducer = (getState, action) => {
     let newState = merge({}, getState);
-
     switch (action.type) {
         case UPDATE_ASSET: {
             return merge(newState, action.asset)
@@ -101,10 +100,33 @@ export const assetReducer = (getState, action) => {
     console.log(getState);
 }
 
+export const ADD_TODO = 'ADD_TODO'
+
+export function addTodo(text) {
+    return { type: ADD_TODO, text }
+}
+
+function todos(state = [], action) {
+    switch (action.type) {
+        case ADD_TODO:
+            return [
+                ...state,
+                {
+                    text: action.text,
+                    completed: false
+                }
+            ]
+        default:
+            return state
+    }
+}
+
 // We combine the reducers here so that they
 // can be left split apart above
 const cryptoReducers = combineReducers({
-    filterReducer
+    filterReducer,
+    assetReducer,
+    todos
 });
 
 export default cryptoReducers;

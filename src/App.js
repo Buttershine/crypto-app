@@ -25,7 +25,7 @@ class App extends Component {
                         <SearchPanel></SearchPanel>
                     </div>
                     <div>
-                        <AssetPanel data = {this.state.coinList}/>
+                        <AssetPanel coinList = {this.state.coinList}/>
                     </div>
                 </div>
             </div>
@@ -107,23 +107,35 @@ class App extends Component {
     }
 
     componentDidMount = async () => {
-        var _this = this;
-
+        let _this = this;
         let response = await this.makeRequest();
         response.result1.data.forEach(function(cmCoin) {
             var token = response.result2.data.Data[cmCoin.symbol];
             if(token) {
                 if (token.ImageUrl) {
                     cmCoin.image = 'https://www.cryptocompare.com' + token.ImageUrl;
-
                 }
             }
         });
 
-        _this.setState({
-            coinList: response.result1.data.slice(0, 10) //assigns the array to the coinList object
-        });
-        localStorage.setItem('coinList',JSON.stringify(this.state.coinList))
+        let list = response.result1.data.slice(0, 10); //assigns the array to the coinList object
+        let localStorageCoinList = JSON.parse(localStorage.getItem('coinList'));
+
+        if(localStorageCoinList.length > 0) {
+            for(let each in localStorageCoinList) {
+                let token = localStorageCoinList[each];
+                token.price_usd = response.result1.data.find(() => response.result1.data.name === token.name); //The find method requires a generic function: () => response.result1.data.name === token.name
+            }
+            list = localStorageCoinList
+            _this.setState({
+                coinList: list
+            });
+        } else {
+            _this.setState({
+                coinList: list
+            });
+        }
+
     }
 
 }
