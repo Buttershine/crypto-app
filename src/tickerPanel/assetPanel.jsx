@@ -45,7 +45,7 @@ class AssetPanel extends Component {
         let newState = Object.assign({}, this.state);
         newState.tokens[id] = token;
         this.setState(newState, () => {
-            this.props.onTodoClick(newState);
+            this.props.updateStore(newState);
         });
     }
 
@@ -92,8 +92,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onTodoClick: id => {
-            dispatch(addTodo(id))
+        updateStore: id => {
+            dispatch(updateStoreForAssetRow(id))
         }
     }
 }

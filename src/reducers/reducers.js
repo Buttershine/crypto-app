@@ -97,36 +97,13 @@ export const assetReducer = (getState, action) => {
             return newState
         }
     }
-    console.log(getState);
-}
-
-export const ADD_TODO = 'ADD_TODO'
-
-export function addTodo(text) {
-    return { type: ADD_TODO, text }
-}
-
-function todos(state = [], action) {
-    switch (action.type) {
-        case ADD_TODO:
-            return [
-                ...state,
-                {
-                    text: action.text,
-                    completed: false
-                }
-            ]
-        default:
-            return state
-    }
 }
 
 // We combine the reducers here so that they
 // can be left split apart above
 const cryptoReducers = combineReducers({
     filterReducer,
-    assetReducer,
-    todos
+    assetReducer
 });
 
 export default cryptoReducers;

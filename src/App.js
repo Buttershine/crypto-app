@@ -124,7 +124,7 @@ class App extends Component {
         if(localStorageCoinList.length > 0) {
             for(let each in localStorageCoinList) {
                 let token = localStorageCoinList[each];
-                token.price_usd = response.result1.data.find(() => response.result1.data.name === token.name); //The find method requires a generic function: () => response.result1.data.name === token.name
+                localStorageCoinList[each].price_usd = response.result1.data.find(() => response.result1.data.name === token.name); //The find method requires a generic function: () => response.result1.data.name === token.name
             }
             list = localStorageCoinList
             _this.setState({
@@ -135,7 +135,6 @@ class App extends Component {
                 coinList: list
             });
         }
-
     }
 
 }
