@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import logo from './logo.svg';
 import { getRequest } from './utility/httpUtil.js';
-import { getUIState } from "./selectors/globalSelectors";
+import { getUIState, getTokenListFromState } from "./selectors/globalSelectors";
 import { sortByPercentage } from "./reducers/reducers";
 import { sortByDollarAmount } from "./reducers/reducers";
 import { sortByBTCRatio } from "./reducers/reducers";
@@ -145,6 +145,10 @@ const mapStateToProps = (state) => {
     const ui = getUIState(state)
     return {
         ui
+    };
+    const tokenList = getTokenListFromState(state)
+    return {
+        tokenList
     };
 }
 
