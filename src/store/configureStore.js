@@ -1,8 +1,10 @@
 import { createStore } from 'redux';
-import cryptoReducers from "../reducers/reducers";
+import rootReducer from "../reducers/reducers";
 
-const configureStore = () => (
+//Order Matters: reducers, state, etc.
+const configureStore = (initialState) => (
     createStore(
+        rootReducer,
         initialState
     )
 );

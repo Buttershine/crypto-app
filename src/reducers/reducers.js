@@ -101,12 +101,10 @@ export const assetReducer = (getState, action) => {
 
 // We combine the reducers here so that they
 // can be left split apart above
-const cryptoReducers = combineReducers({
+export default combineReducers({
     filterReducer,
     assetReducer
 });
-
-export default cryptoReducers;
 
 // const deliveryCalendarReducer = (state = initialState.deliveryCalendar, action) => {
 //     let newState = merge({}, state);

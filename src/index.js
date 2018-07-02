@@ -5,12 +5,10 @@ import { Provider } from 'react-redux';
 import App from './App';
 import initialState from './store/initialState';
 import './App.css';
-import cryptoReducers from "./reducers/reducers";
-
-
+import configureStore from "./store/configureStore";
 
 document.addEventListener("DOMContentLoaded", () => {
-    let store = createStore(cryptoReducers);
+    let store = configureStore(initialState);
     const rootElement = document.getElementById('root')
     render(
         <Provider store={store}>

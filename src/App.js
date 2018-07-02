@@ -103,7 +103,9 @@ class App extends Component {
     }
 
     componentWillUpdate(nextProps, nextState) {
-        localStorage.setItem('coinList',JSON.stringify(this.state.coinList))
+        if(this.state.coinList.length > 0) {
+            localStorage.setItem('coinList', JSON.stringify(this.state.coinList))
+        }
     }
 
     componentDidMount = async () => {
@@ -124,7 +126,7 @@ class App extends Component {
         if(localStorageCoinList.length > 0) {
             for(let each in localStorageCoinList) {
                 let token = localStorageCoinList[each];
-                localStorageCoinList[each].price_usd = response.result1.data.find(() => response.result1.data.name === token.name); //The find method requires a generic function: () => response.result1.data.name === token.name
+                localStorageCoinList[each].price_usd = response.result1.data.find(x => x.name === token.name).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
             }
             list = localStorageCoinList
             _this.setState({
@@ -139,15 +141,17 @@ class App extends Component {
 
 }
 
+const storeGetTokenList = (tokenList) => {
+    return tokenList;
+}
+
 // These props come from the application's
 // state when it is started
 const mapStateToProps = (state) => {
     const ui = getUIState(state)
+    const tokenList = storeGetTokenList(state.tokenList)
     return {
-        ui
-    };
-    const tokenList = getTokenListFromState(state)
-    return {
+        ui,
         tokenList
     };
 }
