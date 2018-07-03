@@ -99,8 +99,12 @@ class App extends Component {
 
     updateCoinList = (localStorageCoinList, response, userTokenList) => {
         for(let each in localStorageCoinList) {
-            let token = localStorageCoinList[each]; //TODO: make it work on user input
-            localStorageCoinList[each].amount = userTokenList ? userTokenList.find(x => x.name === token.name).amount : 0;
+            let token = localStorageCoinList[each];
+            if(userTokenList) {
+                if(userTokenList[localStorageCoinList[each].symbol]) {
+                    localStorageCoinList[each].amount = userTokenList[localStorageCoinList[each].symbol].amount;
+                }
+            }//TODO: make it work on user input
             localStorageCoinList[each].price_usd = response.result1.data.find(x => x.name === token.name).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
         }
         return localStorageCoinList;
@@ -116,6 +120,7 @@ class App extends Component {
     componentDidMount = async () => {
         let _this = this;
         let response = await this.makeRequest();
+        this.state.response = response;
         response.result1.data.forEach(function(cmCoin) {
             var token = response.result2.data.Data[cmCoin.symbol];
             if(token) {
