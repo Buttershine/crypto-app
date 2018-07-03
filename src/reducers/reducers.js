@@ -1,9 +1,12 @@
 import { merge } from 'lodash';
 import { combineReducers } from 'redux';
+import { createSelector } from 'reselect';
+
 
 import {
     LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT_SUCCESS
 } from '../actions/authActions'
+import initialState from "../store/initialState";
 
 // The auth reducer. The starting state sets authentication
 // based on a token being in local storage. In a real app,
@@ -98,6 +101,19 @@ export const assetReducer = (getState, action) => {
         }
     }
 }
+
+export const getTokenListFromStore = (state) => {
+    return state.assetReducer.tokens ? state.assetReducer.tokens : {};
+}
+
+export const getCheckoutModel = (state) => {
+    return 'bananas';
+}
+
+export const selectTokenList = () => createSelector(
+    getTokenListFromStore,
+    tokenList => tokenList.tokens || {}
+)
 
 // We combine the reducers here so that they
 // can be left split apart above

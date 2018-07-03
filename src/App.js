@@ -2,8 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import logo from './logo.svg';
 import { getRequest } from './utility/httpUtil.js';
-import { getUIState, getTokenListFromState } from "./selectors/globalSelectors";
-import { sortByPercentage } from "./reducers/reducers";
+import { getTokenListFromStore, sortByPercentage, getCheckoutModel} from "./reducers/reducers";
 import { sortByDollarAmount } from "./reducers/reducers";
 import { sortByBTCRatio } from "./reducers/reducers";
 import AssetPanel from "./tickerPanel/assetPanel";
@@ -98,12 +97,18 @@ class App extends Component {
         }
     }
 
-    fetchData() {
-
+    updateCoinList = (localStorageCoinList, response, userTokenList) => {
+        for(let each in localStorageCoinList) {
+            let token = localStorageCoinList[each]; //TODO: make it work on user input
+            localStorageCoinList[each].amount = userTokenList ? userTokenList.find(x => x.name === token.name).amount : 0;
+            localStorageCoinList[each].price_usd = response.result1.data.find(x => x.name === token.name).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
+        }
+        return localStorageCoinList;
     }
 
     componentWillUpdate(nextProps, nextState) {
         if(this.state.coinList.length > 0) {
+            this.state.coinList = this.updateCoinList(nextState.coinList, this.state.response, nextProps.tokenList)
             localStorage.setItem('coinList', JSON.stringify(this.state.coinList))
         }
     }
@@ -124,11 +129,8 @@ class App extends Component {
         let localStorageCoinList = JSON.parse(localStorage.getItem('coinList'));
 
         if(localStorageCoinList.length > 0) {
-            for(let each in localStorageCoinList) {
-                let token = localStorageCoinList[each];
-                localStorageCoinList[each].price_usd = response.result1.data.find(x => x.name === token.name).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
-            }
-            list = localStorageCoinList
+
+            list = this.updateCoinList(localStorageCoinList, response);
             _this.setState({
                 coinList: list
             });
@@ -141,21 +143,17 @@ class App extends Component {
 
 }
 
-const storeGetTokenList = (tokenList) => {
-    return tokenList;
-}
-
 // These props come from the application's
 // state when it is started
 const mapStateToProps = (state) => {
-    const ui = getUIState(state)
-    const tokenList = storeGetTokenList(state.tokenList)
+    const tokenList = getTokenListFromStore(state);
+    const order = getCheckoutModel(state);
+
     return {
-        ui,
-        tokenList
+        tokenList,
+        order
     };
 }
-
 
 const mapDispatchToProps = (dispatch) => ({
     sortByPercentage: () => dispatch(sortByPercentage()),
@@ -164,6 +162,9 @@ const mapDispatchToProps = (dispatch) => ({
 
 });
 
-export default connect(mapStateToProps, mapDispatchToProps())(App)
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(App)
 
 //https://coinlib.io/searchable_items_json?json
