@@ -71,10 +71,10 @@ class AssetPanel extends Component {
                                 <div className={isMobile ? "token-name-mobile" : ""}>{coin.name}</div>
                             </div>
                             <div className={isMobile ? "inline-row content-size-mobile vertical-align-price-float-right" : "inline-row price-content vertical-align-price-float-right"}>
-                                <NumberFormat value={this.state.tokens[coin.symbol] ? coin.price_usd * this.state.tokens[coin.symbol].amount : 0} decimalScale={2} displayType={'text'} thousandSeparator={true} prefix={'$'} className={isMobile ? "inline-row content-size-mobile" : ""}/>
+                                <NumberFormat value={coin.amount ? coin.price_usd * coin.amount : 0} decimalScale={2} displayType={'text'} thousandSeparator={true} prefix={'$'} className={isMobile ? "inline-row content-size-mobile" : ""}/>
                             </div>
                             <div className={"inline-row vertical-align-price-float-right"}>
-                                <input type="text" className={isMobile ? "inline-row content-size-mobile ant-input-number amount-input" : "ant-input-number"} onChange={this.handleInput} placeholder=""></input>
+                                <input value={coin.amount} type="text" className={isMobile ? "inline-row content-size-mobile ant-input-number amount-input" : "ant-input-number"} onChange={this.handleInput} placeholder=""></input>
                             </div>
                             <div className={isMobile ? "inline-row content-size-mobile vertical-align-price-float-right" : "inline-row price-content vertical-align-price-float-right"}>
                                 <NumberFormat value={coin.price_usd} decimalScale={2} displayType={'text'} thousandSeparator={true} prefix={'$'} className={isMobile ? this.state.tokens[coin.symbol] ? (this.state.tokens[coin.symbol].amount > 5000) && coin.price_usd > 1000 ? "price-content-hidden" : "inline-row content-size-mobile" : "inline-row content-size-mobile" : ""}/>
