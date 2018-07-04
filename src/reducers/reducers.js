@@ -102,7 +102,7 @@ export const assetReducer = (getState, action) => {
     }
 }
 
-export const getTokenListFromStore = (state) => {
+export const getUpdatedCoinListFromStore = (state) => {
     return state.assetReducer.tokens ? state.assetReducer.tokens : {};
 }
 
@@ -111,7 +111,7 @@ export const getCheckoutModel = (state) => {
 }
 
 export const selectTokenList = () => createSelector(
-    getTokenListFromStore,
+    getUpdatedCoinListFromStore,
     tokenList => tokenList.tokens || {}
 )
 

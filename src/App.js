@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import logo from './logo.svg';
 import { getRequest } from './utility/httpUtil.js';
-import { getTokenListFromStore, sortByPercentage, getCheckoutModel} from "./reducers/reducers";
+import { getUpdatedCoinListFromStore, sortByPercentage, getCheckoutModel} from "./reducers/reducers";
 import { sortByDollarAmount } from "./reducers/reducers";
 import { sortByBTCRatio } from "./reducers/reducers";
 import AssetPanel from "./tickerPanel/assetPanel";
@@ -97,12 +97,12 @@ class App extends Component {
         }
     }
 
-    updateCoinList = (localStorageCoinList, response, userTokenList) => {
+    updateCoinList = (localStorageCoinList, response, userCoinList) => {
         for(let each in localStorageCoinList) {
             let token = localStorageCoinList[each];
-            if(userTokenList) {
-                if(userTokenList[localStorageCoinList[each].symbol]) {
-                    localStorageCoinList[each].amount = userTokenList[localStorageCoinList[each].symbol].amount;
+            if(userCoinList) {
+                if(userCoinList[localStorageCoinList[each].symbol]) {
+                    localStorageCoinList[each].amount = userCoinList[localStorageCoinList[each].symbol].amount;
                 }
             }//TODO: make it work on user input
             localStorageCoinList[each].price_usd = response.result1.data.find(x => x.name === token.name).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
@@ -111,16 +111,28 @@ class App extends Component {
     }
 
     componentWillUpdate(nextProps, nextState) {
-        if(this.state.coinList.length > 0) {
-            this.state.coinList = this.updateCoinList(nextState.coinList, this.state.response, nextProps.tokenList)
-            localStorage.setItem('coinList', JSON.stringify(this.state.coinList))
+        let _this = this;
+        const currentCoinList = this.state.coinList;
+        if(this.state.coinList.length > 0 && nextProps.updatedCoinList) {
+            for(let each in nextState.coinList) {
+                if(nextProps.updatedCoinList) {
+                    if(nextProps.updatedCoinList[nextState.coinList[each].symbol]) {
+                        nextState.coinList[each].amount = nextProps.updatedCoinList[nextState.coinList[each].symbol].amount;
+                    }
+                }
+            }
+            if(nextState.coinList !== currentCoinList) {
+                localStorage.setItem('coinList', JSON.stringify(nextProps.coinList))
+                _this.setState({
+                    coinList: nextState.coinList
+                });
+            }
         }
     }
 
     componentDidMount = async () => {
         let _this = this;
         let response = await this.makeRequest();
-        this.state.response = response;
         response.result1.data.forEach(function(cmCoin) {
             var token = response.result2.data.Data[cmCoin.symbol];
             if(token) {
@@ -131,17 +143,25 @@ class App extends Component {
         });
 
         let list = response.result1.data.slice(0, 10); //assigns the array to the coinList object
-        let localStorageCoinList = JSON.parse(localStorage.getItem('coinList'));
+        let localStorageCoinList = localStorage.getItem("coinList");
 
-        if(localStorageCoinList.length > 0) {
+        if(localStorageCoinList && localStorageCoinList !== "undefined") {
+            localStorageCoinList = JSON.parse(localStorage.getItem('coinList'));
+        } else {
+            localStorageCoinList = false;
+        }
+
+        if(localStorageCoinList ? localStorageCoinList.length > 0 : false) {
 
             list = this.updateCoinList(localStorageCoinList, response);
             _this.setState({
-                coinList: list
+                coinList: list,
+                response: response
             });
         } else {
             _this.setState({
-                coinList: list
+                coinList: list,
+                response: response
             });
         }
     }
@@ -151,11 +171,11 @@ class App extends Component {
 // These props come from the application's
 // state when it is started
 const mapStateToProps = (state) => {
-    const tokenList = getTokenListFromStore(state);
+    const updatedCoinList = getUpdatedCoinListFromStore(state);
     const order = getCheckoutModel(state);
 
     return {
-        tokenList,
+        updatedCoinList,
         order
     };
 }
