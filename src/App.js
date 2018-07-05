@@ -130,7 +130,7 @@ class App extends React.Component {
         this.setState({
             coinList: newState.coinList
         });
-
+        localStorage.setItem('coinList', JSON.stringify(newState.coinList))
     }
 
     updateCoinList = (currentCoinList, response, token) => {
@@ -138,27 +138,11 @@ class App extends React.Component {
             if(token) {
                 if(token.symbol === currentCoinList[eachToken].symbol) {
                     currentCoinList[eachToken].amount = token.amount;
+                    currentCoinList[eachToken].price_usd = response.result1.data.find(x => x.symbol === token.symbol).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
                 }
             }
-            currentCoinList[eachToken].price_usd = response.result1.data.find(x => x.symbol === token.symbol).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
         }
         return currentCoinList;
-    }
-
-    componentWillUpdate(nextProps, nextState) {
-        const currentCoinList = this.state.coinList;
-        if(this.state.coinList.length > 0 && nextProps.updatedCoinList) {
-            for(let each in nextState.coinList) {
-                if(nextProps.updatedCoinList) {
-                    if(nextProps.updatedCoinList[nextState.coinList[each].symbol]) {
-                        nextState.coinList[each].amount = nextProps.updatedCoinList[nextState.coinList[each].symbol].amount;
-                    }
-                }
-            }
-            if(nextState.coinList !== currentCoinList) {
-                localStorage.setItem('coinList', JSON.stringify(nextProps.coinList))
-            }
-        }
     }
 
     componentDidMount = async () => {
