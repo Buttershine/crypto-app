@@ -2,13 +2,19 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import logo from './logo.svg';
 import { getRequest } from './utility/httpUtil.js';
-import { getUpdatedCoinListFromStore, sortByPercentage, getCheckoutModel} from "./reducers/reducers";
+import {
+    getUpdatedCoinListFromStore,
+    sortByPercentage,
+    getCheckoutModel,
+    updateStoreForAssetRow
+} from "./reducers/reducers";
 import { sortByDollarAmount } from "./reducers/reducers";
 import { sortByBTCRatio } from "./reducers/reducers";
 import AssetPanel from "./tickerPanel/assetPanel";
 import SearchPanel from "./components/interaction/searchPanel";
 
-class App extends Component {
+
+class App extends React.Component {
 
     render() {
         return (
@@ -24,7 +30,7 @@ class App extends Component {
                         <SearchPanel></SearchPanel>
                     </div>
                     <div>
-                        <AssetPanel coinList = {this.state.coinList}/>
+                        <AssetPanel handleInput = {this.handleInput} coinList = {this.state.coinList} someProp={this.state.coinList}/>
                     </div>
                 </div>
             </div>
@@ -37,6 +43,8 @@ class App extends Component {
             prevState: {},
             coinList: []
         };
+
+        this.handleInput = this.handleInput.bind(this);
     }
 
     getInitialState() {
@@ -97,21 +105,47 @@ class App extends Component {
         }
     }
 
-    updateCoinList = (localStorageCoinList, response, userCoinList) => {
-        for(let each in localStorageCoinList) {
-            let token = localStorageCoinList[each];
-            if(userCoinList) {
-                if(userCoinList[localStorageCoinList[each].symbol]) {
-                    localStorageCoinList[each].amount = userCoinList[localStorageCoinList[each].symbol].amount;
-                }
-            }//TODO: make it work on user input
-            localStorageCoinList[each].price_usd = response.result1.data.find(x => x.name === token.name).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
+    handleInput = (event) => {
+        const symbol = event.target.parentElement.parentElement.id;
+        const amount = event.target.value;
+        let fiatValue = '';
+        for(let token in this.props.data){
+            if(token.symbol === symbol){
+                fiatValue = this.props.data.price_usd * amount;
+            }
         }
-        return localStorageCoinList;
+        this.createElement(symbol, amount, fiatValue);
+    }
+
+    createElement = (symbol, amount, fiatValue) => {
+        //dynamically created object is concatenated with state
+        let token = {
+            symbol: symbol,
+            amount: amount,
+            fiatValue: fiatValue
+        }
+
+        let newState = Object.assign({}, this.state);
+        newState.coinList = this.updateCoinList(this.state.coinList, this.state.response, token);
+        this.setState({
+            coinList: newState.coinList
+        });
+
+    }
+
+    updateCoinList = (currentCoinList, response, token) => {
+        for(let eachToken in currentCoinList) {
+            if(token) {
+                if(token.symbol === currentCoinList[eachToken].symbol) {
+                    currentCoinList[eachToken].amount = token.amount;
+                }
+            }
+            currentCoinList[eachToken].price_usd = response.result1.data.find(x => x.symbol === token.symbol).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
+        }
+        return currentCoinList;
     }
 
     componentWillUpdate(nextProps, nextState) {
-        let _this = this;
         const currentCoinList = this.state.coinList;
         if(this.state.coinList.length > 0 && nextProps.updatedCoinList) {
             for(let each in nextState.coinList) {
@@ -123,9 +157,6 @@ class App extends Component {
             }
             if(nextState.coinList !== currentCoinList) {
                 localStorage.setItem('coinList', JSON.stringify(nextProps.coinList))
-                _this.setState({
-                    coinList: nextState.coinList
-                });
             }
         }
     }
@@ -183,8 +214,10 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
     sortByPercentage: () => dispatch(sortByPercentage()),
     sortByDollarAmount: () => dispatch(sortByDollarAmount()),
-    sortByBTCRatio: () => dispatch(sortByBTCRatio())
-
+    sortByBTCRatio: () => dispatch(sortByBTCRatio()),
+    updateStore: id => {
+        dispatch(updateStoreForAssetRow(id))
+    }
 });
 
 export default connect(
