@@ -27,7 +27,7 @@ class App extends React.Component {
                 </div>
                 <div>
                     <div>
-                        <SearchPanel></SearchPanel>
+                        <SearchPanel coinListTotal = {this.state.coinListTotal}> </SearchPanel>
                     </div>
                     <div>
                         <AssetPanel handleInput = {this.handleInput} coinList = {this.state.coinList} someProp={this.state.coinList}/>
@@ -127,10 +127,23 @@ class App extends React.Component {
 
         let newState = Object.assign({}, this.state);
         newState.coinList = this.updateCoinList(this.state.coinList, this.state.response, token);
+        newState.coinListTotal = this.calculateTotal(newState.coinList);
         this.setState({
-            coinList: newState.coinList
+            coinList: newState.coinList,
+            coinListTotal: newState.coinListTotal
         });
-        localStorage.setItem('coinList', JSON.stringify(newState.coinList))
+        localStorage.setItem('coinList', JSON.stringify(newState.coinList));
+    }
+
+    calculateTotal(coinList) {
+        let total = 0;
+        for(let eachToken in coinList) {
+            let currentTokenProduct = coinList[eachToken].amount * coinList[eachToken].price_usd;
+            if(!isNaN(currentTokenProduct)) {
+                total = total + currentTokenProduct;
+            }
+        }
+        return total;
     }
 
     updateCoinList = (currentCoinList, response, token) => {
@@ -141,6 +154,16 @@ class App extends React.Component {
                     currentCoinList[eachToken].price_usd = response.result1.data.find(x => x.symbol === token.symbol).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
                 }
             }
+        }
+        return currentCoinList;
+    }
+
+    updatePriceInCoinList = (currentCoinList, response) => {
+        for(let eachToken in currentCoinList) {
+                if(eachToken.symbol === response.symbol) {
+                    currentCoinList[eachToken].price_usd = response.result1.data.find(x => x.symbol === currentCoinList[eachToken].symbol).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
+                }
+
         }
         return currentCoinList;
     }
@@ -168,7 +191,7 @@ class App extends React.Component {
 
         if(localStorageCoinList ? localStorageCoinList.length > 0 : false) {
 
-            list = this.updateCoinList(localStorageCoinList, response);
+            list = this.updatePriceInCoinList(localStorageCoinList, response);
             _this.setState({
                 coinList: list,
                 response: response

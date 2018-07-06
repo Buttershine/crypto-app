@@ -1,11 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
+import * as NumberFormat from 'react-number-format'
 
-class SearchPanel extends Component {
+const isMobile = typeof window.orientation !== 'undefined';
 
-    render() {
-        return (<div></div>);
-    }
-
+const SearchPanel = ({coinListTotal}) => {
+    return (<div>Total:
+                <NumberFormat value={coinListTotal} decimalScale={2} displayType={'text'} thousandSeparator={true} prefix={'$'} className={isMobile ? "inline-row content-size-mobile" : ""}/>
+            </div>);
 };
 
 export default SearchPanel;
