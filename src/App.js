@@ -22,12 +22,12 @@ class App extends React.Component {
                 <div className={"App app-container"}>
                     <header className="App-header">
                         <img src={logo} className="App-logo" alt="logo" />
-                        <h1 className="App-title">Application</h1>
+                        <h1 className="App-title">PolyChain</h1>
                     </header>
                 </div>
                 <div>
                     <div>
-                        <SearchPanel coinListTotal = {this.state.coinListTotal}> </SearchPanel>
+                        <SearchPanel handleSearch = {this.handleSearch} coinListTotal = {this.state.coinListTotal}> </SearchPanel>
                     </div>
                     <div>
                         <AssetPanel handleInput = {this.handleInput} coinList = {this.state.coinList} someProp={this.state.coinList}/>
@@ -117,6 +117,13 @@ class App extends React.Component {
         this.createElement(symbol, amount, fiatValue);
     }
 
+    handleSearch = async (event) => {
+        const symbol = event.target.value;
+        let response = await getRequest("https://api.coinmarketcap.com/v1/ticker/"+symbol+"/");
+        this.updateCoinList(this.state.coinList, response.data[0]);
+        //addCoin to list
+    }
+
     createElement = (symbol, amount, fiatValue) => {
         //dynamically created object is concatenated with state
         let token = {
@@ -133,6 +140,8 @@ class App extends React.Component {
             coinListTotal: newState.coinListTotal
         });
         localStorage.setItem('coinList', JSON.stringify(newState.coinList));
+        localStorage.setItem('coinListTotal', JSON.stringify(newState.coinListTotal));
+
     }
 
     calculateTotal(coinList) {
@@ -147,13 +156,30 @@ class App extends React.Component {
     }
 
     updateCoinList = (currentCoinList, response, token) => {
+        let coinIsInList = false;
         for(let eachToken in currentCoinList) {
             if(token) {
                 if(token.symbol === currentCoinList[eachToken].symbol) {
                     currentCoinList[eachToken].amount = token.amount;
                     currentCoinList[eachToken].price_usd = response.result1.data.find(x => x.symbol === token.symbol).price_usd; //The find method requires a generic function: x => x.name === token.name means search for name in the supplied array and return once found
                 }
+                coinIsInList = true;
+            }else {
+                if(currentCoinList[eachToken].symbol === response.symbol) {
+                    coinIsInList = true;
+                }
             }
+        }
+        debugger;
+        if(!coinIsInList){
+            currentCoinList.push(response);
+            let newState = Object.assign({}, this.state);
+            newState.coinList = currentCoinList;
+            newState.coinListTotal = this.calculateTotal(newState.coinList);
+            this.setState({
+                coinList: newState.coinList,
+                coinListTotal: newState.coinListTotal
+            });
         }
         return currentCoinList;
     }
@@ -190,7 +216,6 @@ class App extends React.Component {
         }
 
         if(localStorageCoinList ? localStorageCoinList.length > 0 : false) {
-
             list = this.updatePriceInCoinList(localStorageCoinList, response);
             _this.setState({
                 coinList: list,
@@ -202,7 +227,16 @@ class App extends React.Component {
                 response: response
             });
         }
-    }
+
+        let localStorageCoinListTotal = localStorage.getItem("coinListTotal");
+            if(localStorageCoinListTotal && localStorageCoinListTotal !== "undefined") {
+                let coinListTotal = this.calculateTotal(localStorageCoinList);
+                _this.setState({
+                    coinListTotal: coinListTotal,
+                    response: response
+                });
+            }
+        }
 
 }
 

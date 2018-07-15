@@ -72,6 +72,33 @@
     min-height: 60px;
 }
 
+.value-panel {
+    border-bottom: 1px solid #759fed;
+    font-family: "Helvetica Neue";
+    align-content: center;
+    text-align: center;
+    padding: 5px;
+}
+
+.value-panel-total {
+    margin: auto;
+    width: 100%;
+    font-size: 42px;
+    padding: 5px;
+    display: inline-block;
+
+}
+
+.value-panel-title {
+    font-size: 10px;
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+.value-panel-search {
+    width: 50px;
+}
+
 .price-content {
     padding-right: 20px;
     padding-left: 20px;
@@ -89,6 +116,10 @@
     display: table;
     border-bottom: 1px solid #759fed;
     padding-top: 5px;
+}
+
+.search-panel-total {
+
 }
 
 .token-name-mobile {
